@@ -8,4 +8,5 @@ public class KiteSpringAppApplication {
     public static void main(String[] args) {
         SpringApplication.run(KiteSpringAppApplication.class, args);
     }
+
 }
