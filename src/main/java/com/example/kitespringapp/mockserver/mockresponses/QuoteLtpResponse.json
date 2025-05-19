@@ -1,0 +1,13 @@
+{
+  "status": "success",
+  "data": {
+    "NFO:NIFTY25MAY24700CE": {
+      "instrument_token": 12345678,
+      "last_price": 102.5
+    },
+    "NFO:NIFTY25MAY24700PE": {
+      "instrument_token": 87654321,
+      "last_price": 88.75
+    }
+  }
+}

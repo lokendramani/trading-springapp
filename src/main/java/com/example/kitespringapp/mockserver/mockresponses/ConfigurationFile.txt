@@ -1,0 +1,8 @@
+<ResponseFileName>-<httpRequestPath>-<method>-<httpRequestBody>-<queryParam>=<queryParamValue>
+QuoteLtpResponse.json-/quote/ltp-GET-i=NFO:NIFTY25MAY24700CE&i=NFO:NIFTY25MAY24700PE
+PortfolioPositionsResponse.json-/portfolio/positions-GET
+OrderResponse.json-/orders/regular-POST-exchange=NFO&tradingsymbol=NIFTY25MAY24700PE&transaction_type=BUY&order_type=MARKET&quantity=75&product=NRML&validity=DAY
+OrderResponse.json-/orders/regular-POST-exchange=NFO&tradingsymbol=NIFTY25MAY24700CE&transaction_type=BUY&order_type=MARKET&quantity=75&product=NRML&validity=DAY
+OrderResponse.json-/orders/regular-POST-exchange=NFO&tradingsymbol=NIFTY25MAY24700PE&transaction_type=SELL&order_type=MARKET&quantity=75&product=NRML&validity=DAY
+OrderResponse.json-/orders/regular-POST-exchange=NFO&tradingsymbol=NIFTY25MAY24700CE&transaction_type=SELL&order_type=MARKET&quantity=75&product=NRML&validity=DAY
+QuoteOHLCNiftyResponse.json-/quote/ohlc-GET-i=NSE:NIFTY 50

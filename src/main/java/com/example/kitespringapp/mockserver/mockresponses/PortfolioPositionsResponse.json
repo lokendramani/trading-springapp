@@ -1,0 +1,49 @@
+{
+  "status": "success",
+  "data": {
+    "net": [
+      {
+        "tradingsymbol": "NIFTY25MAY24700CE",
+        "exchange": "NFO",
+        "instrument_token": 12345678,
+        "product": "NRML",
+        "quantity": -75,
+        "average_price": 110,
+        "last_price": 100,
+        "pnl": 500
+      },
+      {
+        "tradingsymbol": "NIFTY25MAY24700PE",
+        "exchange": "NFO",
+        "instrument_token": 87654321,
+        "product": "NRML",
+        "quantity": -75,
+        "average_price": 95,
+        "last_price": 85,
+        "pnl": 500
+      }
+    ],
+    "day": [
+      {
+        "tradingsymbol": "NIFTY25MAY24700CE",
+        "exchange": "NFO",
+        "instrument_token": 12345678,
+        "product": "NRML",
+        "quantity": -75,
+        "average_price": 110,
+        "last_price": 100,
+        "pnl": 500
+      },
+      {
+        "tradingsymbol": "NIFTY25MAY24700PE",
+        "exchange": "NFO",
+        "instrument_token": 87654321,
+        "product": "NRML",
+        "quantity": -75,
+        "average_price": 95,
+        "last_price": 85,
+        "pnl": 500
+      }
+    ]
+  }
+}
