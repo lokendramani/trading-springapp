@@ -76,20 +76,64 @@ public class PnLMonitorService {
         return null;
     }
 
-    public double getCurrentPnL(PositionsResponse positionsResponse) {
-        if (positionsResponse == null || positionsResponse.getData() == null) return 0.0;
+    private static class PositionDetails {
+        private final double totalPnL;
+        private final double cePnL;
+        private final double pePnL;
+        private final double ceAvgPrice;
+        private final double ceLtp;
+        private final int ceQuantity;
+        private final double peAvgPrice;
+        private final double peLtp;
+        private final int peQuantity;
+
+        public PositionDetails(double totalPnL, double cePnL, double pePnL,
+                             double ceAvgPrice, double ceLtp, int ceQuantity,
+                             double peAvgPrice, double peLtp, int peQuantity) {
+            this.totalPnL = totalPnL;
+            this.cePnL = cePnL;
+            this.pePnL = pePnL;
+            this.ceAvgPrice = ceAvgPrice;
+            this.ceLtp = ceLtp;
+            this.ceQuantity = ceQuantity;
+            this.peAvgPrice = peAvgPrice;
+            this.peLtp = peLtp;
+            this.peQuantity = peQuantity;
+        }
+
+        public double getTotalPnL() { return totalPnL; }
+        public double getCePnL() { return cePnL; }
+        public double getPePnL() { return pePnL; }
+        public double getCeAvgPrice() { return ceAvgPrice; }
+        public double getCeLtp() { return ceLtp; }
+        public int getCeQuantity() { return ceQuantity; }
+        public double getPeAvgPrice() { return peAvgPrice; }
+        public double getPeLtp() { return peLtp; }
+        public int getPeQuantity() { return peQuantity; }
+    }
+
+    public PositionDetails getCurrentPnL(PositionsResponse positionsResponse) {
+        if (positionsResponse == null || positionsResponse.getData() == null) {
+            return new PositionDetails(0.0, 0.0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0);
+        }
 
         List<NetItem> netItems = positionsResponse.getData().getNet().stream()
-                .filter(pos -> {
+                .filter(pos -> { 
                     String symbol = pos.getTradingsymbol();
                     return symbol != null && (symbol.endsWith("CE") || symbol.endsWith("PE")) && pos.getQuantity() != 0;
                 }).collect(Collectors.toList());
 
         Map<String, Double> symbolToLtp = fetchLtpForSymbols(netItems);
 
-        double grossPnl = 0.0;
-        double ceValue = 0.0;
-        double peValue = 0.0;
+        double totalPnL = 0.0;
+        double cePnL = 0.0;
+        double pePnL = 0.0;
+        double ceAvgPrice = 0.0;
+        double ceLtp = 0.0;
+        int ceQuantity = 0;
+        double peAvgPrice = 0.0;
+        double peLtp = 0.0;
+        int peQuantity = 0;
 
         for (NetItem item : netItems) {
             String key = item.getExchange() + ":" + item.getTradingsymbol();
@@ -97,26 +141,32 @@ public class PnLMonitorService {
             if (ltp != null) {
                 int qty = item.getQuantity();
                 double avgPrice = item.getAveragePrice();
-                double pnl = qty > 0 ? (ltp - avgPrice) * qty : (avgPrice - ltp) * Math.abs(qty);
-                grossPnl += pnl;
-                
-                // Calculate CE and PE values using LTP
+                double positionPnL = qty > 0 ? (ltp - avgPrice) * qty : (avgPrice - ltp) * Math.abs(qty);
+                totalPnL += positionPnL;
+
                 if (item.getTradingsymbol().endsWith("CE")) {
-                    ceValue = ltp * Math.abs(qty);
+                    cePnL = positionPnL;
+                    ceAvgPrice = avgPrice;
+                    ceLtp = ltp;
+                    ceQuantity = qty;
                 } else if (item.getTradingsymbol().endsWith("PE")) {
-                    peValue = ltp * Math.abs(qty);
+                    pePnL = positionPnL;
+                    peAvgPrice = avgPrice;
+                    peLtp = ltp;
+                    peQuantity = qty;
                 }
                 
-                System.out.println(item.getTradingsymbol()+" LTP:" + ltp + " and pnl " + pnl);
+                System.out.println(item.getTradingsymbol() + " LTP:" + ltp + " and pnl " + positionPnL);
             }
         }
 
-        // Save PnL record with LTP-based values
-        savePnLRecord(grossPnl, ceValue, peValue);
+        // Save PnL record
+        savePnLRecord(totalPnL, cePnL, pePnL);
 
-        return grossPnl;
+        return new PositionDetails(totalPnL, cePnL, pePnL, 
+                                 ceAvgPrice, ceLtp, ceQuantity,
+                                 peAvgPrice, peLtp, peQuantity);
     }
-
 
     private Map<String, Double> fetchLtpForSymbols(List<NetItem> netItems) {
         HttpHeaders headers = getAuthHeaders();
@@ -154,7 +204,6 @@ public class PnLMonitorService {
         }
         return Collections.emptyMap();
     }
-
 
     public boolean squareOffAll(PositionsResponse positionsResponse) {
         try {
@@ -213,58 +262,25 @@ public class PnLMonitorService {
         System.out.println("Stop loss threshold updated to: " + stopLossThreshold);
     }
 
-    private void printPositionDetails(PositionsResponse positionsResponse, LocalTime currentTime, double currentPnL) {
+    private void printPositionDetails(PositionsResponse positionsResponse, LocalTime currentTime, PositionDetails details) {
         System.out.println("\n=== Position Update at " + currentTime + " ===");
-        System.out.println("Current PnL: " + currentPnL);
+        System.out.println("Current PnL: " + details.getTotalPnL());
         
-        if (positionsResponse.getData() != null && positionsResponse.getData().getNet() != null) {
-            List<NetItem> positions = positionsResponse.getData().getNet();
-            
-            // Track CE and PE positions
-            double totalCEValue = 0;
-            int totalCEQty = 0;
-            double cePriceForStraddle = 0;
-            
-            double totalPEValue = 0;
-            int totalPEQty = 0;
-            double pePriceForStraddle = 0;
-
-            for (NetItem pos : positions) {
-                String symbol = pos.getTradingsymbol();
-                int quantity = pos.getQuantity();
-                double avgPrice = pos.getAveragePrice();
-                
-                // Only process short positions (negative quantity)
-                if (symbol != null && quantity < 0) {
-                    if (symbol.endsWith("CE")) {
-                        totalCEValue = Math.abs(avgPrice * quantity);  // Total value of CE positions
-                        totalCEQty = quantity;
-                        cePriceForStraddle = avgPrice;
-                    } else if (symbol.endsWith("PE")) {
-                        totalPEValue = Math.abs(avgPrice * quantity);  // Total value of PE positions
-                        totalPEQty = quantity;
-                        pePriceForStraddle = avgPrice;
-                    }
-                }
-            }
-
-            System.out.println("\nStraddle Details:");
-            if (totalCEQty < 0) {  // Check for negative quantity (short position)
-                System.out.printf("CE Short Price: %.2f (Qty: %d, Total Value: %.2f)%n", 
-                    cePriceForStraddle, totalCEQty, totalCEValue);
-            }
-            if (totalPEQty < 0) {  // Check for negative quantity (short position)
-                System.out.printf("PE Short Price: %.2f (Qty: %d, Total Value: %.2f)%n", 
-                    pePriceForStraddle, totalPEQty, totalPEValue);
-            }
-            
-            if (totalCEQty < 0 && totalPEQty < 0) {  // Only show total if both legs are short
-                double totalStraddleValue = totalCEValue + totalPEValue;  // Sum of both legs' total values
-                System.out.printf("Total Straddle Value: %.2f (Total Qty: %d)%n", 
-                    totalStraddleValue, totalCEQty + totalPEQty);
-            }
-            System.out.println("================================\n");
+        System.out.println("\nPosition Details:");
+        if (details.getCeQuantity() != 0) {
+            System.out.printf("CE Position - Avg Price: %.2f, LTP: %.2f, Quantity: %d, PnL: %.2f%n", 
+                details.getCeAvgPrice(), details.getCeLtp(), details.getCeQuantity(), details.getCePnL());
         }
+        if (details.getPeQuantity() != 0) {
+            System.out.printf("PE Position - Avg Price: %.2f, LTP: %.2f, Quantity: %d, PnL: %.2f%n", 
+                details.getPeAvgPrice(), details.getPeLtp(), details.getPeQuantity(), details.getPePnL());
+        }
+        
+        if (details.getCeQuantity() != 0 || details.getPeQuantity() != 0) {
+            System.out.printf("Total PnL: %.2f (CE: %.2f, PE: %.2f)%n", 
+                details.getTotalPnL(), details.getCePnL(), details.getPePnL());
+        }
+        System.out.println("================================\n");
     }
 
     private void savePnLRecord(double pnlValue, double ceValue, double peValue) {
@@ -299,17 +315,16 @@ public class PnLMonitorService {
                     return;
                 }
                 
-                double currentPnL = getCurrentPnL(positionsResponse);
-                
-                printPositionDetails(positionsResponse, currentTime, currentPnL);
+                PositionDetails details = getCurrentPnL(positionsResponse);
+                printPositionDetails(positionsResponse, currentTime, details);
 
-                if (currentPnL < stopLossThreshold) {
-                    System.out.println("Stop Loss Triggered at PnL: " + currentPnL);
+                if (details.getTotalPnL() < stopLossThreshold) {
+                    System.out.println("Stop Loss Triggered at PnL: " + details.getTotalPnL());
                     if (squareOffAll(positionsResponse)) {
                         stopMonitoring();
                     }
                 } else if (currentTime.isAfter(LocalTime.of(15, 01))) {
-                    System.out.println("EOD Exit at PnL: " + currentPnL);
+                    System.out.println("EOD Exit at PnL: " + details.getTotalPnL());
                     if (squareOffAll(positionsResponse)) {
                         stopMonitoring();
                     }

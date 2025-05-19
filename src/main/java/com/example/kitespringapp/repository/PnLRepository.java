@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface PnLRepository extends JpaRepository<PnLRecord, Long> {
     
-    @Query("SELECT p FROM PnLRecord p WHERE p.timestamp >= :startTime ORDER BY p.timestamp")
+    @Query("SELECT p FROM PnLRecord p WHERE p.timestamp <= :startTime ORDER BY p.timestamp")
     List<PnLRecord> findRecentRecords(LocalDateTime startTime);
 } 

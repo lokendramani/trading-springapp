@@ -26,7 +26,7 @@ public class PnLDataController {
             LocalDateTime startTime) {
         
         if (startTime == null) {
-            startTime = LocalDateTime.now().minusHours(1); // Default to last hour
+            startTime = LocalDateTime.now(); // Default to last hour
         }
         
         List<PnLRecord> records = pnlRepository.findRecentRecords(startTime);
