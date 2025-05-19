@@ -308,7 +308,7 @@ public class PnLMonitorService {
                     if (squareOffAll(positionsResponse)) {
                         stopMonitoring();
                     }
-                } else if (currentTime.isAfter(LocalTime.of(21, 40))) {
+                } else if (currentTime.isAfter(LocalTime.of(15, 01))) {
                     System.out.println("EOD Exit at PnL: " + currentPnL);
                     if (squareOffAll(positionsResponse)) {
                         stopMonitoring();
