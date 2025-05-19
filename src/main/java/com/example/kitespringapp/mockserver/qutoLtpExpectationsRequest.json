@@ -1,0 +1,34 @@
+{
+    "id":"3275db1c-4a54-491a-bde8-3d67411360e1",
+  "httpRequest": {
+    "method": "GET",
+    "path": "/quote/ltp",
+    "queryStringParameters": {
+      "i": [
+        "NFO:NIFTY25MAY24700CE",
+        "NFO:NIFTY25MAY24700PE"
+      ]
+    }
+  },
+  "httpResponse": {
+    "statusCode": 200,
+    "headers": {
+      "Content-Type": ["application/json"]
+    },
+    "body": {
+      "status":"success",
+      "data": {
+      "NFO:NIFTY25MAY24700CE": {
+        "instrument_token": 123456,
+        "last_price": 105
+      },
+      "NFO:NIFTY25MAY24700PE": {
+        "instrument_token": 654321,
+        "last_price": 91
+      }}
+    }
+  },
+  "times": {
+    "unlimited": true
+  }
+}
