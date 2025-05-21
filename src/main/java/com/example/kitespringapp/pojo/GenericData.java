@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class Data{
+public class GenericData {
 
 	@JsonProperty("order_id")
 	private String orderId;

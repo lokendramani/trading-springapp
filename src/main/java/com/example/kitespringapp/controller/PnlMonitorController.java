@@ -1,5 +1,6 @@
 package com.example.kitespringapp.controller;
 
+import com.example.kitespringapp.service.AccessTokenService;
 import com.example.kitespringapp.service.PnLMonitorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +15,8 @@ public class PnlMonitorController {
     @Value("${kite.api.key}")
     private String api_key;
     
-    @Value("${kite.accessToken}")
-    private String accessToken;
+    @Autowired
+    private AccessTokenService accessTokenService;
 
     @Value("${kite.api.base-url}")
     private String baseUrl;
@@ -26,7 +27,8 @@ public class PnlMonitorController {
     @GetMapping("/start")
     public ResponseEntity<String> startMonitoring() {
         try {
-            pnlMonitorService.startMonitoring(api_key, accessToken);
+
+            pnlMonitorService.startMonitoring(api_key, accessTokenService.getAccessToken());
             return ResponseEntity.ok("P&L Monitoring started successfully");
         } catch (Exception e) {
             return ResponseEntity.internalServerError()

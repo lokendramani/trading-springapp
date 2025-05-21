@@ -1,5 +1,6 @@
 package com.example.kitespringapp.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,8 @@ public class StrategyService {
     @Value("${kite.api.key}")
     private String apiKey;
     
-    @Value("${kite.accessToken}")
-    private String accessToken;
+    @Autowired
+    private AccessTokenService accessTokenService;
 
     private static final String QUOTE_URL = "/quote/ohlc";
     private static final String ORDER_URL = "/orders/regular";
@@ -124,7 +125,7 @@ public class StrategyService {
     private HttpHeaders getAuthHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Kite-Version", "3");
-        headers.set("Authorization", "token " + apiKey + ":" + accessToken);
+        headers.set("Authorization", "token " + apiKey + ":" + accessTokenService.getAccessToken());
         return headers;
     }
 

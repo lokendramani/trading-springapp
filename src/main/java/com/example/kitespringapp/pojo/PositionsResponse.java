@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class PositionsResponse{
 
 	@JsonProperty("data")
-	private Data data;
+	private GenericData data;
 
 	@JsonProperty("status")
 	private String status;
 
-	public Data getData(){
+	public GenericData getData(){
 		return data;
 	}
 

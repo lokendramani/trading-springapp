@@ -1,20 +1,20 @@
-package com.example.kitespringapp.pojo;
+package com.example.kitespringapp.pojo.accessResponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class OrderResponse{
+public class AccessTokenResponse{
 
 	@JsonProperty("data")
-	private GenericData data;
+	private Data data;
 
 	@JsonProperty("status")
 	private String status;
 
-	public void setData(GenericData data){
+	public void setData(Data data){
 		this.data = data;
 	}
 
-	public GenericData getData(){
+	public Data getData(){
 		return data;
 	}
 

@@ -305,6 +305,11 @@ public class PnLMonitorService {
         this.apiKey = apiKey;
         this.accessToken = accessToken;
 
+        // Trailing stop-loss configuration
+        final double trailingStartThreshold = 2000.0; // Start trailing after this profit
+        final double trailingDropAmount = 1000.0;     // Trail if PnL drops by this amount
+        final double[] peakPnL = {Double.NEGATIVE_INFINITY}; // Use array to mutate inside lambda
+
         scheduledTask = scheduler.scheduleAtFixedRate(() -> {
             try {
                 LocalTime currentTime = LocalTime.now();
@@ -318,12 +323,25 @@ public class PnLMonitorService {
                 PositionDetails details = getCurrentPnL(positionsResponse);
                 printPositionDetails(positionsResponse, currentTime, details);
 
+                // Update peakPnL if currentPnL is a new high
+                if (details.getTotalPnL() > peakPnL[0]) {
+                    peakPnL[0] = details.getTotalPnL();
+                }
+                // Check trailing stop-loss condition only after threshold is crossed
+                if (peakPnL[0] >= trailingStartThreshold &&
+                        (peakPnL[0] - details.getTotalPnL()) >= trailingDropAmount) {
+                    System.out.println("Trailing Stop Loss Triggered. Peak PnL: " + peakPnL[0] + ", Current PnL: " + details.getTotalPnL());
+                    if (squareOffAll(positionsResponse)) {
+                        stopMonitoring();
+                    }
+                }
+
                 if (details.getTotalPnL() < stopLossThreshold) {
                     System.out.println("Stop Loss Triggered at PnL: " + details.getTotalPnL());
                     if (squareOffAll(positionsResponse)) {
                         stopMonitoring();
                     }
-                } else if (currentTime.isAfter(LocalTime.of(15, 01))) {
+                } else if (currentTime.isAfter(LocalTime.of(19, 01))) {
                     System.out.println("EOD Exit at PnL: " + details.getTotalPnL());
                     if (squareOffAll(positionsResponse)) {
                         stopMonitoring();

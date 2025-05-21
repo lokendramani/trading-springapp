@@ -1,5 +1,8 @@
 package com.example.kitespringapp.controller;
 
+import com.example.kitespringapp.pojo.accessResponse.AccessTokenResponse;
+import com.example.kitespringapp.service.AccessTokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,13 +21,16 @@ public class KiteController {
     @Value("${kite.api.secret}")
     private String apiSecret;
 
+    @Autowired
+    private AccessTokenService  accessTokenService;
+
     @GetMapping("/kite/login")
     public String getLoginUrl() {
         return "https://kite.trade/connect/login?api_key=" + apiKey;
     }
 
     @PostMapping("/kite/access-token")
-    public ResponseEntity<String> generateAccessToken(@RequestParam String requestToken) {
+    public ResponseEntity<AccessTokenResponse> generateAccessToken(@RequestParam String requestToken) {
         String url = "https://api.kite.trade/session/token";
 
         HttpHeaders headers = new HttpHeaders();
@@ -40,7 +46,9 @@ public class KiteController {
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+        ResponseEntity<AccessTokenResponse> response = restTemplate.exchange(url, HttpMethod.POST, request, AccessTokenResponse.class);
+        accessTokenService.setAccessToken(response.getBody().getData().getAccessToken());
+        System.out.println("AccessToken:"+response.getBody().getData().getAccessToken());
 
         return response;
     }
