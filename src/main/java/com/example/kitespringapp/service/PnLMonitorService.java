@@ -326,6 +326,7 @@ public class PnLMonitorService {
                 // Update peakPnL if currentPnL is a new high
                 if (details.getTotalPnL() > peakPnL[0]) {
                     peakPnL[0] = details.getTotalPnL();
+                    System.out.println("Peak PnL reached at:"+peakPnL[0]);
                 }
                 // Check trailing stop-loss condition only after threshold is crossed
                 if (peakPnL[0] >= trailingStartThreshold &&

@@ -19,6 +19,34 @@ function updateStrategyDetails(data) {
 // Initialize monitoring button state
 let isMonitoring = false;
 
+// setup Access Token
+async function setupAccessToken(){
+    const requestToken = document.getElementById('requestTokenInput').value;
+    if (!requestToken) {
+            showStatus('danger', 'Please enter the request token.');
+            return;
+        }
+    const setupBtn = document.getElementById('accessTokenBtn');
+    try{
+    const response = await fetch(`/kite/access-token?requestToken=${encodeURIComponent(requestToken)}`, {
+                                 method: 'POST'
+                             });
+    const data = await response.json();
+
+     if (response.ok) {
+         showStatus('success', 'Setup done successfully!');
+         updateStrategyDetails(data);
+     } else {
+         showStatus('danger', `Error: ${data.message}`);
+     }
+
+    }catch (error) {
+             showStatus('danger', `Error: ${error.message}`);
+         } finally {
+             executeBtn.disabled = false;
+         }
+}
+
 // Execute strategy
 async function executeStrategy() {
     const executeBtn = document.getElementById('executeBtn');
@@ -83,7 +111,9 @@ async function toggleMonitoring() {
 document.addEventListener('DOMContentLoaded', () => {
     const executeBtn = document.getElementById('executeBtn');
     const monitorBtn = document.getElementById('monitorBtn');
-    
+    const accessBtn =  document.getElementById('accessTokenBtn');
+
+    accessBtn.addEventListener('click', setupAccessToken);
     executeBtn.addEventListener('click', executeStrategy);
     monitorBtn.addEventListener('click', toggleMonitoring);
 }); 
