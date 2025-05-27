@@ -21,6 +21,26 @@
         "average_price": 95,
         "last_price": 85,
         "pnl": 500
+      },
+      {
+        "tradingsymbol": "BDL",
+        "exchange": "NFO",
+        "instrument_token": 12345678,
+        "product": "NRML",
+        "quantity": -10,
+        "average_price": 2000,
+        "last_price": 2100,
+        "pnl": -1000
+      },
+      {
+        "tradingsymbol": "HAL",
+        "exchange": "NFO",
+        "instrument_token": 12345678,
+        "product": "NRML",
+        "quantity": 10,
+        "average_price": 5058,
+        "last_price": 5028,
+        "pnl": 300
       }
     ],
     "day": [

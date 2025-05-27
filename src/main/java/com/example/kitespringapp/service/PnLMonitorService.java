@@ -1,9 +1,11 @@
 package com.example.kitespringapp.service;
 
+import com.example.kitespringapp.entity.StrategyPosition;
 import com.example.kitespringapp.pojo.NetItem;
 import com.example.kitespringapp.pojo.PositionsResponse;
 import com.example.kitespringapp.entity.PnLRecord;
 import com.example.kitespringapp.repository.PnLRepository;
+import com.example.kitespringapp.repository.StrategyPositionsRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.*;
@@ -42,6 +44,9 @@ public class PnLMonitorService {
 
     @Autowired
     private PnLRepository pnlRepository;
+
+    @Autowired
+    private StrategyPositionsRepository repo;
 
     public PnLMonitorService() {
         this.restTemplate = new RestTemplate();
@@ -209,34 +214,44 @@ public class PnLMonitorService {
         try {
             if (positionsResponse == null || positionsResponse.getData() == null) return false;
 
+            List<StrategyPosition> strategyPositions = repo.findByStrategyName("NiftyStraddle");
+            Set<String> strategySymbols = strategyPositions.stream()
+                    .map(StrategyPosition::getTradingSymbol)
+                    .collect(Collectors.toSet());
+
             for (NetItem position : positionsResponse.getData().getNet()) {
-                int quantity = position.getQuantity();
-                if (quantity == 0) continue;
+                if(strategySymbols.contains(position.getTradingsymbol())) {
+                    int quantity = position.getQuantity();
+                    if (quantity == 0) continue;
 
-                String tradingsymbol = position.getTradingsymbol();
-                String exchange = position.getExchange();
-                String product = position.getProduct();
-                String transactionType = quantity > 0 ? "SELL" : "BUY";
-                int absQty = Math.abs(quantity);
+                    String tradingsymbol = position.getTradingsymbol();
+                    String exchange = position.getExchange();
+                    String product = position.getProduct();
+                    String transactionType = quantity > 0 ? "SELL" : "BUY";
+                    int absQty = Math.abs(quantity);
 
-                HttpHeaders orderHeaders = getAuthHeaders();
-                orderHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                    HttpHeaders orderHeaders = getAuthHeaders();
+                    orderHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-                String body = "exchange=" + exchange +
-                        "&tradingsymbol=" + tradingsymbol +
-                        "&transaction_type=" + transactionType +
-                        "&order_type=MARKET" +
-                        "&quantity=" + absQty +
-                        "&product=" + product +
-                        "&validity=DAY";
+                    String body = "exchange=" + exchange +
+                            "&tradingsymbol=" + tradingsymbol +
+                            "&transaction_type=" + transactionType +
+                            "&order_type=MARKET" +
+                            "&quantity=" + absQty +
+                            "&product=" + product +
+                            "&validity=DAY";
 
-                HttpEntity<String> orderEntity = new HttpEntity<>(body, orderHeaders);
-                String url = baseUrl + ORDER_URL;
-                System.out.println("Square off url " + url);
-                ResponseEntity<String> orderResponse = restTemplate.postForEntity(url, orderEntity, String.class);
+                    HttpEntity<String> orderEntity = new HttpEntity<>(body, orderHeaders);
+                    String url = baseUrl + ORDER_URL;
+                    System.out.println("Square off url " + url);
+                    ResponseEntity<String> orderResponse = restTemplate.postForEntity(url, orderEntity, String.class);
 
-                if (!orderResponse.getStatusCode().is2xxSuccessful()) {
-                    System.err.println("Failed to square off: " + tradingsymbol);
+                    if (!orderResponse.getStatusCode().is2xxSuccessful()) {
+                        System.err.println("Failed to square off: " + tradingsymbol);
+                    }
+                }else{
+                    System.out.println("Not squaring off "+position.getTradingsymbol()+" as it is not related to any " +
+                            "of our strategy!!!");
                 }
             }
 

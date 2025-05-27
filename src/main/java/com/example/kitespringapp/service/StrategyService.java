@@ -1,5 +1,7 @@
 package com.example.kitespringapp.service;
 
+import com.example.kitespringapp.entity.StrategyPosition;
+import com.example.kitespringapp.repository.StrategyPositionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -24,6 +26,9 @@ public class StrategyService {
     
     @Autowired
     private AccessTokenService accessTokenService;
+
+    @Autowired
+    private StrategyPositionsRepository repo;
 
     private static final String QUOTE_URL = "/quote/ohlc";
     private static final String ORDER_URL = "/orders/regular";
@@ -63,6 +68,7 @@ public class StrategyService {
             // 5. Place PE order
             placeOrder(peSymbol, "SELL", 75);
 
+            createPostions("NiftyStraddle",ceSymbol,peSymbol);
             response.setStatus("SUCCESS");
             response.setMessage("Short straddle orders placed successfully");
             return response;
@@ -135,5 +141,10 @@ public class StrategyService {
         // Format: 25MAY (for May 2024)
         System.out.println("Strike Price: " + strikePrice);
         return strikePrice;
+    }
+
+    private void createPostions(String strategyName, String ceSymbol, String peSymbol) {
+        repo.save(new StrategyPosition(ceSymbol, strategyName, "CE"));
+        repo.save(new StrategyPosition(peSymbol, strategyName, "PE"));
     }
 } 
