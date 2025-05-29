@@ -2,6 +2,7 @@ package com.example.kitespringapp.service;
 
 import com.example.kitespringapp.entity.StrategyPosition;
 import com.example.kitespringapp.repository.StrategyPositionsRepository;
+import com.example.kitespringapp.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -52,7 +53,8 @@ public class StrategyService {
             response.setStrikePrice(strikePrice);
 
             // 3. Generate option symbols with monthly expiry
-            String expiryDate = getMonthlyExpiryDate();
+//            String expiryDate = getMonthlyExpiryDate();
+            String expiryDate = Utils.getNextValidMonthlyExpirySymbol();
             String ceSymbol = String.format("NIFTY%s%d%s", expiryDate, strikePrice, "CE");
             String peSymbol = String.format("NIFTY%s%d%s", expiryDate, strikePrice, "PE");
 

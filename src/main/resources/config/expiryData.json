@@ -1,0 +1,67 @@
+[
+  {
+    "year": "2025",
+    "months": [
+      {
+        "month": "May",
+        "weekly": ["08-May-2025","15-May-2025","22-May-2025"],
+        "monthly": "29-May-2025"
+      },
+      {
+        "month": "Jun",
+        "weekly": ["05-Jun-2025","12-Jun-2025","19-Jun-2025"],
+        "monthly": "26-Jun-2025"
+      },
+      {
+        "month": "Jul",
+        "weekly": ["03-Jul-2025"],
+        "monthly": "31-Jul-2025"
+      },
+      {
+        "month": "Aug",
+        "weekly": [""],
+        "monthly": ""
+      },
+      {
+        "month": "Sep",
+        "weekly": [""],
+        "monthly": "25-Sep-2025"
+      },
+      {
+        "month": "Oct",
+        "weekly": [""],
+        "monthly": ""
+      },
+      {
+        "month": "Nov",
+        "weekly": [""],
+        "monthly": ""
+      },
+      {
+        "month": "Dec",
+        "weekly": [""],
+        "monthly": "24-Dec-2025"
+      }
+    ]
+  },
+  {
+    "year": "2026",
+    "months": [
+      {
+        "month": "Mar",
+        "weekly": [""],
+        "monthly": "26-Mar-2026"
+      },
+      {
+        "month": "Jun",
+        "weekly": [""],
+        "monthly": "25-Jun-2026"
+      },
+      {
+        "month": "Dec",
+        "weekly": [""],
+        "monthly": "31-Dec-2026"
+      }
+    ]
+  }
+]
